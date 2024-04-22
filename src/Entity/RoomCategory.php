@@ -32,13 +32,13 @@ class RoomCategory
     /**
      * @var Collection<int, RoomCategoryPhoto>
      */
-    #[ORM\OneToMany(targetEntity: RoomCategoryPhoto::class, mappedBy: 'roomCategory', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RoomCategoryPhoto::class, mappedBy: 'roomCategory', orphanRemoval: true, cascade: ['persist'])]
     private Collection $roomCategoryPhotos;
 
     /**
      * @var Collection<int, RoomCategoryDetails>
      */
-    #[ORM\OneToMany(targetEntity: RoomCategoryDetails::class, mappedBy: 'roomCategory', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RoomCategoryDetails::class, mappedBy: 'roomCategory', orphanRemoval: true, cascade: ['persist'])]
     private Collection $roomCategoryDetails;
 
     public function __construct()
