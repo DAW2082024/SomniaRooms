@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Entity\RoomCategory;
+use App\Entity\User;
 
 class SomniaDashboardController extends AbstractDashboardController
 {
@@ -30,5 +31,8 @@ class SomniaDashboardController extends AbstractDashboardController
         
         yield MenuItem::Section('Room Management');
         yield MenuItem::linkToCrud('Category', 'fas fa-list', RoomCategory::class);
+
+        yield MenuItem::Section('App Management');
+        yield MenuItem::linkToCrud('Users', 'fas fa-user', User::class);
     }
 }

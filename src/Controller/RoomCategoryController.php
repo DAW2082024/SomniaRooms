@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Context\Normalizer\ObjectNormalizerContextBuild
 class RoomCategoryController extends AbstractController
 {
 
-    #[Route('/room/category', name: 'app_room_category')]
+    #[Route('/room/category', name: 'app_room_AllCategories')]
     public function getAll(RoomCategoryRepository $catRepo, SerializerInterface $serializer): Response
     {
         $catList = $catRepo->findAll();
