@@ -28,7 +28,7 @@ class RoomCategoryCrudController extends AbstractCrudController
     {
         return [
             TextField::new('name'),
-            TextEditorField::new('description'),
+            TextField::new('description'),
             TextField::new('bedType'),
             IntegerField::new('maxGuestNum'),
             CollectionField::new('roomCategoryDetails')->useEntryCrudForm(),

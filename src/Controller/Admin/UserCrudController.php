@@ -31,7 +31,7 @@ class UserCrudController extends AbstractCrudController
         yield TextField::new ('username');
         yield TextField::new ('username')->onlyWhenUpdating()->setDisabled(true);
 
-        $availableRoles = ['User' => 'ROLE_USER', 'Admin' => 'ROLE_ADMIN', 'Test' => 'ROLE_TEST'];
+        $availableRoles = ['User' => 'ROLE_USER', 'Admin' => 'ROLE_ADMIN', 'Test' => 'ROLE_TEST', 'SuperAdmin' => 'ROLE_SUPERADMIN'];
         yield ChoiceField::new ('roles')
             ->setChoices($availableRoles)
             ->allowMultipleChoices(true);

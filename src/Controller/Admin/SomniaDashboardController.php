@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 use App\Entity\RoomCategory;
 use App\Entity\User;
+use App\Entity\ConfigVariable;
 
 class SomniaDashboardController extends AbstractDashboardController
 {
@@ -33,6 +34,8 @@ class SomniaDashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Category', 'fas fa-list', RoomCategory::class);
 
         yield MenuItem::Section('App Management');
-        yield MenuItem::linkToCrud('Users', 'fas fa-user', User::class);
+        yield MenuItem::linkToCrud('Config Vars', 'fas fa-gear', ConfigVariable::class);
+        yield MenuItem::linkToCrud('Users', 'fas fa-user', User::class)
+            ->setPermission("ROLE_SUPERADMIN");
     }
 }
