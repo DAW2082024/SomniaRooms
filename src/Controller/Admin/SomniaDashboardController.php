@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Entity\RoomCategory;
+use App\Entity\RoomAvailability;
+
 use App\Entity\User;
 use App\Entity\ConfigVariable;
 
@@ -31,7 +33,8 @@ class SomniaDashboardController extends AbstractDashboardController
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         
         yield MenuItem::Section('Room Management');
-        yield MenuItem::linkToCrud('Category', 'fas fa-list', RoomCategory::class);
+        yield MenuItem::linkToCrud('Category', 'fas fa-door-open', RoomCategory::class);
+        yield MenuItem::linkToRoute('Room Availability', 'fas fa-calendar-check', 'admin_roomAvailability');
 
         yield MenuItem::Section('App Management');
         yield MenuItem::linkToCrud('Config Vars', 'fas fa-gear', ConfigVariable::class);

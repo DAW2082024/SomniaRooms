@@ -1,0 +1,25 @@
+{# templates/admin/room_availability/index.html.twig #}
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title 'Room Availability' %}
+{% block main %}
+<div>
+    <h3>{{categoryData.name}}</h3>
+</div>
+<table class="datagrid">
+    <thead>
+        <tr>
+            <td>Day</td>
+            <td>Amount</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for availability in availabilityList %}
+        <tr>
+            <td>{{availability.day |date('d-m-Y')}}</td>
+            <td>{{availability.numAvailable}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
