@@ -20,11 +20,12 @@ class FareTableCrudController extends AbstractCrudController
     {
         //$catRepo = $this->entityManager->getRepository(SomeEntity::class);
 
+        yield TextField::new('comment')->setLabel('Name');
+        
         yield AssociationField::new('roomCategory');
 
         yield DateField::new('startDate');
         yield DateField::new('endDate');
 
-        yield TextField::new('comment');
     }
 }

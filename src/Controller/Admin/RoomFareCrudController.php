@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class RoomFareCrudController extends AbstractCrudController
 {
@@ -27,6 +28,8 @@ class RoomFareCrudController extends AbstractCrudController
 
         yield NumberField::new ('guestNumber');
         yield MoneyField::new ('fareAmount')->setCurrency('EUR');
+
+        yield TextField::new('dayType')->setMaxLength(2);
         
 
     }

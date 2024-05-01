@@ -21,28 +21,62 @@ class FareTableRepository extends ServiceEntityRepository
         parent::__construct($registry, FareTable::class);
     }
 
-//    /**
-//     * @return FareTable[] Returns an array of FareTable objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('f')
-//            ->andWhere('f.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('f.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Gets all fareTables for time period.
+     * @param integer|string ID Categoria.
+     * @param DateTimeInterface Period start date
+     * @param DateTimeInterface Period end date
+     * @return array Array with all faretables active in given period.
+     */
+    public function findFareTable(int $roomCategory, \DateTimeInterface $startDate, \DateTimeInterface $endDate): array
+    {
+        $strStartDate = $startDate->format('Y-m-d');
+        $strEndDate = $endDate->format('Y-m-d');
 
-//    public function findOneBySomeField($value): ?FareTable
-//    {
-//        return $this->createQueryBuilder('f')
-//            ->andWhere('f.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.roomCategory = :category')
+            ->andWhere('f.startDate < :endDate')
+            ->andWhere('f.endDate >= :startDate')
+            ->setParameter('category', $roomCategory)
+            ->setParameter('startDate', $strStartDate)
+            ->setParameter('endDate', $strEndDate)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Obtiene una lista con los números de huéspedes permitidos por todos los tarifarios pasados.
+     * @param FareTable[] $fareTableList Lista con los FareTable a consultar.
+     * @return int[] Lista con los números de huéspedes permitidos.
+     */
+    public function getAllowedGuestNumberOnFareTableList(array $fareTableList): array
+    {
+        $fareTableCount = count($fareTableList);
+
+        $fareTableIdList = \array_map(function (FareTable $element) {
+            return $element->getId();
+        }, $fareTableList);
+        $strIdList = \implode(",", $fareTableIdList);
+
+        //Subquery -> Obtiene los números de huéspedes de las tarifas de un tarifario.
+        //Query -> Cuenta en cuantos tarifarios aparece cada número de huéspedes y queda con aquellos que aparecen en todos (having).
+        $sql = "SELECT guest_number
+                    FROM (SELECT DISTINCT fare_table_id, guest_number FROM room_fare WHERE fare_table_id IN ($strIdList))
+                GROUP BY guest_number
+                HAVING COUNT(fare_table_id) = $fareTableCount";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $rs = $conn->executeQuery($sql);
+
+        $allowedGuestNumbers = [];
+        while (true) {
+            $value = $rs->fetchOne();
+            if (!$value) {
+                break;
+            }
+            $allowedGuestNumbers[] = $value;
+        }
+
+        return $allowedGuestNumbers;
+    }
 }

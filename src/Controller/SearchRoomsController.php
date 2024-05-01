@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Controller;
+
+use App\Repository\FareTableRepository;
+use App\Repository\RoomAvailabilityRepository;
+use App\Repository\RoomCategoryRepository;
+use App\Service\PricesService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class SearchRoomsController extends AbstractController
+{
+    #[Route('/search/availability', name: 'app_search_availability')]
+    public function getAvailabilityForPeriod(Request $request, RoomAvailabilityRepository $repoAvailability): Response
+    {
+        $payload = $request->toArray();
+        if (\is_null($payload)) {
+            throw new \Exception('Invalid Payload', 400);
+        }
+        $filter = $payload["filter"];
+
+        $startDate = new \DateTime($filter["startDate"]);
+        $endDate = new \DateTime($filter["endDate"]);
+
+        $rs = $repoAvailability->getAvailabilityForPeriod($startDate, $endDate);
+
+        return $this->json($rs);
+    }
+
+    #[Route('/search/availabilityDetails', name: 'app_search_availabilityDetails')]
+    public function getAvailabilityForPeriodDetails(Request $request, RoomAvailabilityRepository $repoAvailability): Response
+    {
+        $payload = $request->toArray();
+        if (\is_null($payload)) {
+            throw new \Exception('Invalid Payload', 400);
+        }
+        $filter = $payload["filter"];
+
+        $startDate = new \DateTime($filter["startDate"]);
+        $endDate = new \DateTime($filter["endDate"]);
+
+        $rs = $repoAvailability->getAvailabilityForPeriodDetails($startDate, $endDate);
+
+        return $this->json($rs);
+    }
+
+    #[Route('/search/fares', name: 'app_search_faresForCategory')]
+    public function getFaresForCategoryOnPeriod(Request $request, RoomCategoryRepository $repoCat): Response
+    {
+        $payload = $request->toArray();
+        if (\is_null($payload)) {
+            throw new \Exception('Invalid Payload', 400);
+        }
+        $filter = $payload["filter"];
+
+        $catId = $filter["roomCategory"];
+        if ($repoCat->find($catId) === null) {
+            throw new \Exception('Invalid Category', 400);
+        }
+
+        $startDate = new \DateTime($filter["startDate"]);
+        $endDate = new \DateTime($filter["endDate"]);
+
+        $daysDiff = $startDate->diff($endDate)->days;
+        if (!$daysDiff || $startDate > $endDate) {
+            throw new \Exception('Invalid time interval', 400);
+        }
+
+        return $this->json(["prices" => $dailyPrices]);
+    }
+
+    #[Route('/search/debug', name: 'app_search_faresDebug')]
+    public function faresDebug(Request $request, PricesService $priceService, FareTableRepository $repoFareTable, RoomCategoryRepository $repoCat): Response
+    {
+        $fareTable[] = $repoFareTable->find(1);
+        $fareTable[] = $repoFareTable->find(2);
+        $cat = $repoCat->find(4);
+
+        //$rs = $repoFareTable->getAllowedGuestNumberOnFareTableList($fareTable);
+        $startDate = new \DateTime("2024-04-20");
+        $endDate = new \DateTime("2024-04-21");
+
+        $rs = $priceService->getCategoryPricesForSearch($cat, $startDate, $endDate);
+
+        return $this->json($rs);
+    }
+}

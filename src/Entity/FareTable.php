@@ -23,10 +23,10 @@ class FareTable
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $startDate = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type : Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endDate = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length : 255, nullable: true)]
     private ?string $comment = null;
 
     /**
@@ -123,10 +123,57 @@ class FareTable
         return $this;
     }
 
-    public function __toString() : string {
-        if(!\is_null($this->comment)) {
+    public function __toString(): string
+    {
+        if (!\is_null($this->comment)) {
             return $this->comment;
         }
         return $this->id;
+    }
+
+    /**
+     * Get max guest number for current roomFares.
+     */
+    public function getMaxGuestNumber(): int
+    {
+        $maxGuests = $this->getRoomFares()->reduce(function (int $acc, RoomFare $value): int {
+            return \max($acc, $value->getGuestNumber());
+        }, -1);
+
+        return $maxGuests;
+    }
+
+    /**
+     * Get min guest number for current roomFares.
+     */
+    public function getMinGuestNumber(): int
+    {
+        $firstGuestNum = $this->getRoomFares()->first()->getGuestNumber() ?? 999;
+
+        $maxGuests = $this->getRoomFares()->reduce(function (int $acc, RoomFare $value): int {
+            return \min($acc, $value->getGuestNumber());
+        }, $firstGuestNum);
+
+        return $maxGuests;
+    }
+
+    /**
+     * Obtiene las tarifas que aplican al GuestNumber indicado.
+     * @param int $guestNumber GuestNumber para búsqueda.
+     * @return RoomFare[] Lista de tarifas.
+     */
+    public function getRoomFaresByGuestNumber(int $guestNumber)
+    {
+        $roomFareList = $this->getRoomFares()->filter(function (RoomFare $element) use ($guestNumber) {
+            return $element->getGuestNumber() == $guestNumber;
+        });
+
+        return $roomFareList;
+    }
+
+    public function isActiveOnDate(\DateTimeInterface $date): bool
+    {
+        $active = ($this->startDate <= $date && $this->endDate > $date);
+        return $active;
     }
 }

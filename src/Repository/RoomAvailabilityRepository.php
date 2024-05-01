@@ -34,13 +34,41 @@ class RoomAvailabilityRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    //    public function findOneBySomeField($value): ?RoomAvailability
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+
+    /**
+     * @param \DateTimeInterface Period start (included in range).
+     * @param \DateTimeInterface Period end (not included in range).
+     * @return RoomAvailability[] Returns an array of RoomAvailability objects
+     */
+    public function getAvailabilityForPeriod(\DateTimeInterface $startDate, \DateTimeInterface $endDate): array
+    {
+        $strStartDate = $startDate->format('Y-m-d');
+        $strEndDate = $endDate->format('Y-m-d');
+
+        return $this->createQueryBuilder('ra')
+            ->select('IDENTITY(ra.roomCategory) as roomCategory, MIN(ra.numAvailable) as availability')
+            ->andWhere('ra.day >= :startDate')
+            ->andWhere('ra.day < :endDate')
+            ->groupBy('ra.roomCategory')
+            ->setParameter('startDate', $strStartDate)
+            ->setParameter('endDate', $strEndDate)
+            ->getQuery()
+            ->getArrayResult()
+        ;
+    }
+
+    public function getAvailabilityForPeriodDetails(\DateTimeInterface $startDate, \DateTimeInterface $endDate): array
+    {
+        $strStartDate = $startDate->format('Y-m-d');
+        $strEndDate = $endDate->format('Y-m-d');
+
+        return $this->createQueryBuilder('ra')
+            ->andWhere('ra.day >= :startDate')
+            ->andWhere('ra.day < :endDate')
+            ->setParameter('startDate', $strStartDate)
+            ->setParameter('endDate', $strEndDate)
+            ->getQuery()
+            ->getArrayResult()
+        ;
+    }
 }
