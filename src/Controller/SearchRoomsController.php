@@ -79,11 +79,10 @@ class SearchRoomsController extends AbstractController
         $fareTable[] = $repoFareTable->find(2);
         $cat = $repoCat->find(4);
 
-        //$rs = $repoFareTable->getAllowedGuestNumberOnFareTableList($fareTable);
-        $startDate = new \DateTime("2024-04-20");
-        $endDate = new \DateTime("2024-04-21");
+        $startDate = new \DateTime("2024-04-27");
+        $endDate = new \DateTime("2024-05-02");
 
-        $rs = $priceService->getCategoryPricesForSearch($cat, $startDate, $endDate);
+        $rs = $priceService->getFinalPricesForSearch($cat, $startDate, $endDate);
 
         return $this->json($rs);
     }

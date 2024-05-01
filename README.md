@@ -1,10 +1,10 @@
-# InstantRooms
+# SomniaRooms
 
 A Hotel Room booking system.
 
 Powered by:
-- PHP Synfony.
-- Easyadmin
+- PHP Symfony.
+- Easyadmin.
 
 ## Commands:
 
@@ -16,6 +16,7 @@ docker compose build --no-cache
 Start Containers:
 ```
 docker compose up --pull always -d --wait
+docker compose --env-file .\.env.local up -d --watch
 ```
 
 Stop containers
