@@ -16,7 +16,7 @@ docker compose build --no-cache
 Start Containers:
 ```
 docker compose up --pull always -d --wait
-docker compose --env-file .\.env.local up -d --watch
+docker compose --env-file .\.env.local up -d --wait
 ```
 
 Stop containers

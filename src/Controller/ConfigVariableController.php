@@ -9,7 +9,7 @@ use App\Repository\ConfigVariableRepository;
 
 class ConfigVariableController extends AbstractController
 {
-    #[Route('/config', name: 'app_config_variable')]
+    #[Route('/api/config', name: 'app_config_variable')]
     public function getAllVariables(ConfigVariableRepository $repo): Response
     {
         $varList = $repo->findAllVariables();
@@ -17,7 +17,7 @@ class ConfigVariableController extends AbstractController
         return $this->json(['results' => $varList]);
     }
 
-    #[Route('/config/section', name: 'app_config_sections')]
+    #[Route('/api/config/section', name: 'app_config_sections')]
     public function getSections(ConfigVariableRepository $repo): Response
     {
         $sectionList = $repo->getAllSections();
@@ -30,7 +30,7 @@ class ConfigVariableController extends AbstractController
         return $this->json(['results' => $returnList]);
     }
 
-    #[Route('/config/section/{section}', name: 'app_config_variableBySection')]
+    #[Route('/api/config/section/{section}', name: 'app_config_variableBySection')]
     public function getVariablesBySection(ConfigVariableRepository $repo, string $section): Response
     {
         if(\is_null($section) || $section == '') {
@@ -42,7 +42,7 @@ class ConfigVariableController extends AbstractController
         return $this->json(['results' => $varList]);
     }
 
-    #[Route('/config/var/{key}', name: 'app_config_variable')]
+    #[Route('/api/config/var/{key}', name: 'app_config_variable')]
     public function getByKey(ConfigVariableRepository $repo, string $key): Response
     {
         $var = $repo->findVariableByKey($key);

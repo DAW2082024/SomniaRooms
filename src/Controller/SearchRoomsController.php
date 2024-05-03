@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class SearchRoomsController extends AbstractController
 {
-    #[Route('/search/availability', name: 'app_search_availability')]
+    #[Route('/api/search/availability', name: 'app_search_availability')]
     public function getAvailabilityForPeriod(Request $request, RoomAvailabilityRepository $repoAvailability): Response
     {
         $payload = $request->toArray();
@@ -30,7 +30,7 @@ class SearchRoomsController extends AbstractController
         return $this->json($rs);
     }
 
-    #[Route('/search/availabilityDetails', name: 'app_search_availabilityDetails')]
+    #[Route('/api/search/availabilityDetails', name: 'app_search_availabilityDetails')]
     public function getAvailabilityForPeriodDetails(Request $request, RoomAvailabilityRepository $repoAvailability): Response
     {
         $payload = $request->toArray();
@@ -47,8 +47,8 @@ class SearchRoomsController extends AbstractController
         return $this->json($rs);
     }
 
-    #[Route('/search/fares', name: 'app_search_faresForCategory')]
-    public function getFaresForCategoryOnPeriod(Request $request, RoomCategoryRepository $repoCat): Response
+    #[Route('/api/search/fares', name: 'app_search_faresForCategory')]
+    public function getFaresForCategoryOnPeriod(Request $request, RoomCategoryRepository $repoCat, PricesService $priceService): Response
     {
         $payload = $request->toArray();
         if (\is_null($payload)) {
@@ -57,7 +57,8 @@ class SearchRoomsController extends AbstractController
         $filter = $payload["filter"];
 
         $catId = $filter["roomCategory"];
-        if ($repoCat->find($catId) === null) {
+        $roomCategory = $repoCat->find($catId);
+        if ($roomCategory === null) {
             throw new \Exception('Invalid Category', 400);
         }
 
@@ -69,7 +70,9 @@ class SearchRoomsController extends AbstractController
             throw new \Exception('Invalid time interval', 400);
         }
 
-        return $this->json(["prices" => $dailyPrices]);
+        $rs = $priceService->getFinalPricesForSearch($roomCategory, $startDate, $endDate);
+
+        return $this->json(["prices" => $rs]);
     }
 
     #[Route('/search/debug', name: 'app_search_faresDebug')]
