@@ -52,6 +52,9 @@ class FareTableRepository extends ServiceEntityRepository
     public function getAllowedGuestNumberOnFareTableList(array $fareTableList): array
     {
         $fareTableCount = count($fareTableList);
+        if($fareTableCount == 0) {
+            return [];
+        }
 
         $fareTableIdList = \array_map(function (FareTable $element) {
             return $element->getId();

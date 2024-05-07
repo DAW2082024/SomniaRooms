@@ -27,7 +27,7 @@ class SearchRoomsController extends AbstractController
 
         $rs = $repoAvailability->getAvailabilityForPeriod($startDate, $endDate);
 
-        return $this->json($rs);
+        return $this->json(["results" => $rs]);
     }
 
     #[Route('/api/search/availabilityDetails', name: 'app_search_availabilityDetails')]
@@ -70,9 +70,13 @@ class SearchRoomsController extends AbstractController
             throw new \Exception('Invalid time interval', 400);
         }
 
-        $rs = $priceService->getFinalPricesForSearch($roomCategory, $startDate, $endDate);
+        $fareList = $priceService->getFinalPricesForSearch($roomCategory, $startDate, $endDate);
+        $rs = [];
+        foreach ($fareList as $key => $value) {
+            $rs[] = [ "guestNumber" => $key, "price" => $value];
+        }
 
-        return $this->json(["prices" => $rs]);
+        return $this->json(["results" => $rs]);
     }
 
     #[Route('/search/debug', name: 'app_search_faresDebug')]
