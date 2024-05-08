@@ -19,20 +19,23 @@ class Booking
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $ArrivalDate = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type : Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $DepartureDate = null;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    #[ORM\Column(type : Types::DATETIMETZ_MUTABLE)]
     private ?\DateTimeInterface $BookingTime = null;
 
-    #[ORM\OneToOne(mappedBy: 'Booking', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy : 'Booking', cascade: ['persist', 'remove'])]
     private ?BookingCustomer $bookingCustomer = null;
 
     /**
      * @var Collection<int, BookingRoom>
      */
-    #[ORM\OneToMany(targetEntity: BookingRoom::class, mappedBy: 'Booking', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: BookingRoom::class, mappedBy: 'Booking', orphanRemoval: true, cascade: ['persist'])]
     private Collection $bookingRooms;
+
+    #[ORM\Column(length: 20)]
+    private ?string $refNumber = null;
 
     public function __construct()
     {
@@ -88,8 +91,8 @@ class Booking
     public function setBookingCustomer(BookingCustomer $bookingCustomer): static
     {
         // set the owning side of the relation if necessary
-        if ($bookingCustomer->getBookingId() !== $this) {
-            $bookingCustomer->setBookingId($this);
+        if ($bookingCustomer->getBooking() !== $this) {
+            $bookingCustomer->setBooking($this);
         }
 
         $this->bookingCustomer = $bookingCustomer;
@@ -109,7 +112,7 @@ class Booking
     {
         if (!$this->bookingRooms->contains($bookingRoom)) {
             $this->bookingRooms->add($bookingRoom);
-            $bookingRoom->setBookingId($this);
+            $bookingRoom->setBooking($this);
         }
 
         return $this;
@@ -119,11 +122,28 @@ class Booking
     {
         if ($this->bookingRooms->removeElement($bookingRoom)) {
             // set the owning side to null (unless already changed)
-            if ($bookingRoom->getBookingId() === $this) {
-                $bookingRoom->setBookingId(null);
+            if ($bookingRoom->getBooking() === $this) {
+                $bookingRoom->setBooking(null);
             }
         }
 
         return $this;
+    }
+
+    public function getRefNumber(): ?string
+    {
+        return $this->refNumber;
+    }
+
+    public function setRefNumber(string $refNumber): static
+    {
+        $this->refNumber = $refNumber;
+
+        return $this;
+    }
+
+    function __toString(): string
+    {
+        return $this->getRefNumber();
     }
 }

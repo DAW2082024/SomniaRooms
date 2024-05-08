@@ -52,7 +52,7 @@ class BookingRoom
         return $this->RoomCategory;
     }
 
-    public function setRoomCategoryId(?RoomCategory $RoomCategory): static
+    public function setRoomCategory(?RoomCategory $RoomCategory): static
     {
         $this->RoomCategory = $RoomCategory;
 
@@ -93,5 +93,10 @@ class BookingRoom
         $this->Amount = $Amount;
 
         return $this;
+    }
+
+    function __toString(): string
+    {
+        return $this->getAmount() . " " . $this->getRoomCategory()->getName() . " - " . $this->getGuestNumber() . " Guests";
     }
 }

@@ -93,4 +93,9 @@ class BookingCustomer
 
         return $this;
     }
+
+    function __toString(): string
+    {
+        return $this->getName() . " " . $this->getSurname();
+    }
 }

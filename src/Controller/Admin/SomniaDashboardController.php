@@ -2,19 +2,17 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Booking;
+use App\Entity\ConfigVariable;
+use App\Entity\FareTable;
+use App\Entity\RoomCategory;
+use App\Entity\RoomFare;
+use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
-use App\Entity\RoomCategory;
-use App\Entity\RoomAvailability;
-use App\Entity\FareTable;
-use App\Entity\RoomFare;
-
-use App\Entity\User;
-use App\Entity\ConfigVariable;
 
 class SomniaDashboardController extends AbstractDashboardController
 {
@@ -26,14 +24,17 @@ class SomniaDashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        return Dashboard::new()
+        return Dashboard::new ()
             ->setTitle('SomniaRooms');
     }
 
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        
+
+        yield MenuItem::Section('Booking Management');
+        yield MenuItem::linkToCrud('Bookings', 'fas fa-door-open', Booking::class);
+
         yield MenuItem::Section('Room Management');
         yield MenuItem::linkToCrud('Category', 'fas fa-door-open', RoomCategory::class);
         yield MenuItem::linkToRoute('Room Availability', 'fas fa-calendar-check', 'admin_roomAvailability');
