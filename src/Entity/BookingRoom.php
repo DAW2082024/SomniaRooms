@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\BookingRoomRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: BookingRoomRepository::class)]
 class BookingRoom
@@ -15,10 +16,12 @@ class BookingRoom
 
     #[ORM\ManyToOne(inversedBy: 'bookingRooms')]
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
+    #[Ignore]
     private ?Booking $Booking = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Ignore]
     private ?RoomCategory $RoomCategory = null;
 
     #[ORM\Column]
@@ -35,11 +38,13 @@ class BookingRoom
         return $this->id;
     }
 
+    #[Ignore]
     public function getBooking(): ?Booking
     {
         return $this->Booking;
     }
 
+    #[Ignore]
     public function setBooking(?Booking $Booking): static
     {
         $this->Booking = $Booking;
@@ -47,16 +52,23 @@ class BookingRoom
         return $this;
     }
 
+    #[Ignore]
     public function getRoomCategory(): ?RoomCategory
     {
         return $this->RoomCategory;
     }
 
+    #[Ignore]
     public function setRoomCategory(?RoomCategory $RoomCategory): static
     {
         $this->RoomCategory = $RoomCategory;
 
         return $this;
+    }
+
+    public function getRoomCategoryId(): int
+    {
+        return $this->getRoomCategory()->getId();
     }
 
     public function getGuestNumber(): ?int

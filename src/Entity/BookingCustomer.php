@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\BookingCustomerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: BookingCustomerRepository::class)]
 class BookingCustomer
@@ -15,6 +16,7 @@ class BookingCustomer
 
     #[ORM\OneToOne(inversedBy: 'bookingCustomer', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
+    #[Ignore]
     private ?Booking $Booking = null;
 
     #[ORM\Column(length: 64)]
@@ -34,11 +36,13 @@ class BookingCustomer
         return $this->id;
     }
 
+    #[Ignore]
     public function getBooking(): ?Booking
     {
         return $this->Booking;
     }
 
+    #[Ignore]
     public function setBooking(Booking $Booking): static
     {
         $this->Booking = $Booking;
