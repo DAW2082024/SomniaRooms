@@ -57,4 +57,8 @@ class RoomAvailability
 
         return $this;
     }
+
+    public function modNumAvailable(int $diffAmount):void {
+        $this->numAvailable -= $diffAmount;
+    }
 }

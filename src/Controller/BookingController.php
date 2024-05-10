@@ -7,6 +7,8 @@ use App\Entity\BookingCustomer;
 use App\Entity\BookingRoom;
 use App\Repository\BookingRepository;
 use App\Repository\RoomCategoryRepository;
+use App\Repository\RoomAvailabilityRepository;
+use App\Service\PricesService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,12 +43,15 @@ class BookingController extends AbstractController
     }
 
     #[Route('/api/booking/create', name: 'app_booking_create')]
-    public function newBooking(Request $request, BookingRepository $repoBooking, EntityManagerInterface $entityManager, RoomCategoryRepository $repoCat): JsonResponse
+    public function newBooking(Request $request, BookingRepository $repoBooking, EntityManagerInterface $entityManager, 
+        RoomCategoryRepository $repoCat, RoomAvailabilityRepository $repoAvailability,
+        PricesService $priceSrv): JsonResponse
     {
         $payload = $request->toArray();
         if (\is_null($payload)) {
             throw new \Exception('Invalid Payload', 400);
         }
+
 
         $booking = new Booking();
         try {
@@ -65,11 +70,17 @@ class BookingController extends AbstractController
             $currentTime = new \DateTime();
 
             // Create booking from request data.
-            //$booking = new Booking();
             $booking->setBookingTime($currentTime);
             $booking->setArrivalDate($arrivalDate);
             $booking->setDepartureDate($departureDate);
-            $booking->setRefNumber($currentTime->format("Y") . "001");
+
+            $highest_id = $entityManager->createQueryBuilder()
+            ->select('MAX(e.id)')
+            ->from('App\Entity\Booking', 'e')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+            $booking->setRefNumber($currentTime->format("Y") . $highest_id + 1);
 
             $entityManager->persist($booking);
 
@@ -89,22 +100,50 @@ class BookingController extends AbstractController
                 throw new HttpException(400, "Se debe indicar al menos una habitación");
             }
 
+            // Create each room.
             foreach ($reqRoomList as $roomItem) {
                 $room = new BookingRoom();
                 $room->setBooking($booking);
 
                 //Get Room category.
                 $roomCategory = $repoCat->find($roomItem["roomCategory"]);
-                if($roomCategory == null) {
+                if ($roomCategory == null) {
                     throw new HttpException(400, "La RoomCategory no es válida.");
                 }
 
+                //Check room availability.
+                $amountAvailable = $repoAvailability->getAvailabilityForCategoryInPeriod($roomCategory, $arrivalDate, $departureDate);
+                $selectedAmount = $roomItem['amount'];
+                $selectedGuestAmount = $roomItem["guestNumber"];
+
+                if($amountAvailable == null || $selectedAmount > $amountAvailable) {
+                    throw new HttpException(400, "No se pueden reservar más habitaciones de las disponibles.");
+                }
+
                 $room->setRoomCategory($roomCategory);
-                $room->setGuestNumber($roomItem["guestNumber"]);
-                $room->setAmount($roomItem["amount"]);
-                $room->setRoomPrice(5000);
+                $room->setGuestNumber($selectedGuestAmount);
+                $room->setAmount($selectedAmount);
+
+                //Get Price for period.
+                $priceList = $priceSrv->getFinalPricesForSearch($roomCategory, $arrivalDate, $departureDate);
+                $priceFound = false;
+                foreach ($priceList as $key => $value) {
+                    if($key == $selectedGuestAmount) {
+                        $room->setRoomPrice($value);
+                        $priceFound = true;
+                        break;
+                    }
+                }
+                
+                if(!$priceFound) {
+                    throw new HttpException(500, 
+                        "No se puedo obtener el precio para la categoría: " . $roommCategory->getId() . " , guests: " . $selecctedGuestAmount);
+                }
 
                 $entityManager->persist($room);
+
+                //If booking is nice, let's update current availability.
+                $repoAvailability->updateAvailabilityForRoomCategoryOnPeriod($roomCategory, $arrivalDate, $departureDate, $selectedAmount, true); //Update using "diff" mode.
             }
 
             $entityManager->commit();
