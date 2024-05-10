@@ -29,7 +29,7 @@ class RoomAvailability
 
     public function setDay(\DateTimeInterface $day): static
     {
-        $this->day = $day->format("Ymd");
+        $this->day = $day->format("Y-m-d");
 
         return $this;
     }

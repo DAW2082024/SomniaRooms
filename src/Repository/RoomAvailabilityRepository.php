@@ -61,7 +61,7 @@ class RoomAvailabilityRepository extends ServiceEntityRepository
      * @param \DateTimeInterface Period end (not included in range).
      * @return int Returns number of available room of that category on selected period.
      */
-    public function getAvailabilityForCategoryInPeriod(RoomCategory $roomCategory, \DateTimeInterface $startDate, \DateTimeInterface $endDate): int|null
+    public function getAvailabilityForCategoryInPeriod(RoomCategory $roomCategory, \DateTimeInterface $startDate, \DateTimeInterface $endDate): int | null
     {
         $strStartDate = $startDate->format('Y-m-d');
         $strEndDate = $endDate->format('Y-m-d');
@@ -125,4 +125,53 @@ class RoomAvailabilityRepository extends ServiceEntityRepository
             }
         }
     }
+
+    /**
+     * For a given RoomCategory, sets its availability for all days on a period with the given amount.
+     */
+    public function bulkEditRoomAvailabilityForCategoryOnPeriod(RoomCategory $roomCategory, \DateTimeInterface $startDate, \DateTimeInterface $endDate, int $amount): void
+    {
+        $strStartDate = $startDate->format('Y-m-d');
+        $strEndDate = $endDate->format('Y-m-d');
+        $roomCatId = $roomCategory->getId();
+
+        $entityManager = $this->getEntityManager();
+        $entityManager->beginTransaction();
+
+        try {
+
+            //First, delete old data.
+            $this->createQueryBuilder('ra')
+                ->delete()
+                ->andWhere('ra.day >= :startDate')
+                ->andWhere('ra.day < :endDate')
+                ->andWhere('ra.roomCategory = :roomCategory')
+                ->setParameter('roomCategory', $roomCatId)
+                ->setParameter('startDate', $strStartDate)
+                ->setParameter('endDate', $strEndDate)
+                ->getQuery()
+                ->execute();
+
+            $entityManager->flush();
+
+            //For each day, create item and persist it.
+            $daterange = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate);
+            foreach ($daterange as $date) {
+                $item = new RoomAvailability();
+                $item->setRoomCategory($roomCategory);
+                $item->setDay($date);
+                $item->setNumAvailable($amount);
+
+                $entityManager->persist($item);
+            }
+
+            $entityManager->flush();
+            $entityManager->commit();
+
+        } catch (\Throwable $th) {
+            $entityManager->rollback();
+            throw $th;
+        }
+    }
+
 }

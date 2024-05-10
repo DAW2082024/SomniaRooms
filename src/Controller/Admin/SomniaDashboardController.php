@@ -33,13 +33,13 @@ class SomniaDashboardController extends AbstractDashboardController
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
 
         yield MenuItem::Section('Booking Management');
-        yield MenuItem::linkToCrud('Bookings', 'fas fa-door-open', Booking::class);
+        yield MenuItem::linkToCrud('Bookings', 'fas fa-book', Booking::class);
 
         yield MenuItem::Section('Room Management');
-        yield MenuItem::linkToCrud('Category', 'fas fa-door-open', RoomCategory::class);
+        yield MenuItem::linkToCrud('Category', 'fas fa-layer-group', RoomCategory::class);
         yield MenuItem::linkToRoute('Room Availability', 'fas fa-calendar-check', 'admin_roomAvailability');
-        yield MenuItem::linkToCrud('Fare Tables', 'fas fa-door-open', FareTable::class);
-        yield MenuItem::linkToCrud('Room Fares', 'fas fa-door-open', RoomFare::class);
+        yield MenuItem::linkToCrud('Fare Tables', 'fas fa-table', FareTable::class);
+        yield MenuItem::linkToCrud('Room Fares', 'fas fa-tag', RoomFare::class);
 
         yield MenuItem::Section('App Management');
         yield MenuItem::linkToCrud('Config Vars', 'fas fa-gear', ConfigVariable::class);
