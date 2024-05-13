@@ -71,7 +71,7 @@ volumes:
 ```
 
 Config details
-- SERVER_NAME -> if set to https a SSL cert will be obtained. If you set http, SSL will be disabled.
+- SERVER_NAME -> if set to https a SSL cert will be obtained. If you set http, SSL will be disabled. (Read more about this [here](https://caddyserver.com/docs/automatic-https))
 
 
 Front-end:

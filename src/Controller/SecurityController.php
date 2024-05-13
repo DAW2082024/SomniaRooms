@@ -37,9 +37,10 @@ class SecurityController extends AbstractController
     #[Route(path: '/setup', name: 'app_security_addAdmin')]
     public function addAdmin(UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
     {
-        $setupStatus = $entityManager->find(ConfigVariable::class, "SETUP_STATUS");
+        $configRepo = $entityManager->getRepository(ConfigVariable::class);
+        $setupStatus = $configRepo->findBy(["key" => "SETUP_STATUS"]);
 
-        if($setupStatus == null || $setupStatus == 1) {
+        if($setupStatus != null && $setupStatus[0] != null && $setupStatus[0]->getValue() != 1) {
             return new Response("Setup was already done");
         }
 
