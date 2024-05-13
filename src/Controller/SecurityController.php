@@ -2,15 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Entity\ConfigVariable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Doctrine\ORM\EntityManagerInterface;
-
-use App\Entity\User;
-use App\Repository\UserRepository;
 
 class SecurityController extends AbstractController
 {
@@ -35,24 +34,51 @@ class SecurityController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route(path: '/addAdmin', name: 'app_security_addAdmin')]
+    #[Route(path: '/setup', name: 'app_security_addAdmin')]
     public function addAdmin(UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
     {
-        $user = new User();
-        $user->setUsername("admin");
-        $user->setRoles(["ROLE_USER", "ROLE_ADMIN"]);
-        $plaintextPassword = "admin";
+        $setupStatus = $entityManager->find(ConfigVariable::class, "SETUP_STATUS");
 
-        // hash the password (based on the security.yaml config for the $user class)
-        $hashedPassword = $passwordHasher->hashPassword(
-            $user,
-            $plaintextPassword
-        );
-        $user->setPassword($hashedPassword);
+        if($setupStatus == null || $setupStatus == 1) {
+            return new Response("Setup was already done");
+        }
 
-        $entityManager->persist($user);
-        $entityManager->flush();
 
-        return new Response("Created user - Admin");
+        $entityManager->beginTransaction();
+
+        try {
+
+            //Create system variables.
+            $var_setup = new ConfigVariable();
+            $var_setup->setKey("SETUP_STATUS");
+            $var_setup->setValue("1");
+            $var_setup->setSection("SYSTEM");
+            $entityManager->persist($var_setup);
+
+
+            //Create user Admin.
+            $user = new User();
+            $user->setUsername("admin");
+            $user->setRoles(["ROLE_USER", "ROLE_ADMIN", "ROLE_SUPERADMIN"]);
+            $plaintextPassword = "admin";
+
+            // hash the password (based on the security.yaml config for the $user class)
+            $hashedPassword = $passwordHasher->hashPassword(
+                $user,
+                $plaintextPassword
+            );
+            $user->setPassword($hashedPassword);
+
+            $entityManager->persist($user);
+            
+            $entityManager->flush();
+            $entityManager->commit(); 
+
+        } catch (\Throwable $th) {
+            $entityManager->rollback();
+            throw $th;
+        }
+
+        return new Response("Setup completed :)");
     }
 }
