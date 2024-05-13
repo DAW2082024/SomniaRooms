@@ -23,3 +23,17 @@ Stop containers
 ```
 docker compose down --remove-orphans
 ```
+
+### Prod:
+
+You can use docker compose for prod or build and deploy a prod image.
+
+**Build Prod image**
+```
+docker build -t somniarooms:prod --target frankenphp_prod .
+```
+
+**Deploy prod image**
+```
+docker run -d -it -p 80:80 -p 443:443 --name somniarooms --env-file ./env.prod.local somniarooms:prod
+```
