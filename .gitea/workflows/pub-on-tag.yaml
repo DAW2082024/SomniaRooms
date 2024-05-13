@@ -38,7 +38,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{vars.REGISTRY_INSTANCE}}/${{gitea.repository_owner}}/somniarooms:devbuild
+          tags: ${{vars.REGISTRY_INSTANCE}}/somnia/somniarooms:devbuild
           target: frankenphp_prod
           platforms: linux/amd64,linux/arm64
           secrets: | 
